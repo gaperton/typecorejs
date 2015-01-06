@@ -32,10 +32,11 @@ var Options = Object.type({
 
 // TODO: array patterns
 var List = Array.of( Number )
+var List = Number.Array
 var List = [ Number.or( null ) ];
 
 //TODO: new spec for optional parameters
-.takes( Array.or( Model ).or( Object.Plain ) ).optional( SetOptions )
+.takes( Array.or( Model ).or( Object.Plain ), SetOptions['?'] )
 
 // TODO: function types as argument types
 .takes( Object, Object, [ Function.takes( Object.Any, String ).returns( Object.Any ), [ Object ] ])
