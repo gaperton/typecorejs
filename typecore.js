@@ -21,7 +21,7 @@
         }
 
         return dest;
-    }
+    };
 
     function Class(){
         return this.initialize.apply( this, arguments );
@@ -65,7 +65,6 @@
         }
     }
 
-
     Class.implement = function( spec ){
         Object.xcopy( this.prototype, spec, function( method, name ){
             var proxy = this.prototype[ name ];
@@ -73,28 +72,27 @@
                 return proxy._returns ?
                     function(){
                         proxy.apply( this, arguments );
-                        var res = method.apply( this, arguments );
-                        if( !proxy._returns.check( res ) ){
-                            throw new TypeError();
-                        }
-
-                        return res;
+                        return proxy._returns( method.apply( this, arguments ) );
                     }
-                : function(){
-                    proxy.apply( this, arguments );
-                    return method.apply( this, arguments );
-                }
+                    : function(){
+                        proxy.apply( this, arguments );
+                        return method.apply( this, arguments );
+                    };
             }
         }, this );
-    }
+    };
 
-    Object.implement = function( Class, spec ){ return Class.implement( spec ); }
+    Object.implement = function( Class, spec ){ return Class.implement( spec ); };
 
     function _returns( type ){
         delete this.takes;
         delete this.returns;
-        this._returns = typeof type === function ? type :
-                { check : function( value ){ return value === type; };
+        var checker = typeof type === 'function' ? type.check : function( value ){ return value === type; };
+
+        this._returns = function( value ){
+            if( !checker( value ) ) throw new TypeError();
+            return value;
+        };
 
         return this;
     }
@@ -151,24 +149,10 @@
     }
 
     Function.prototype.or = _or;
+    Function.prototype.check = function( value ){ return value instanceof this; };
 
-    Function.prototype.check = function( value ){
-        return value instanceof this;
-    }
-
-    Function.check = function( value ){
-        return typeof value === 'function';
-    }
-
-    Number.check = function( value ){
-        return typeof value === 'number';
-    }
-
-    String.check = function( value ){
-        return typeof value === 'string';
-    }
-
-    Boolean.check = function( value ){
-        return typeof value === 'boolean';
-    }
+    Function.check  = function( value ){ return typeof value === 'function'; };
+    Number.check    = function( value ){ return typeof value === 'number'; };
+    String.check    = function( value ){ return typeof value === 'string'; };
+    Boolean.check   = function( value ){ return typeof value === 'boolean'; };
 } )();
