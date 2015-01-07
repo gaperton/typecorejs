@@ -68,6 +68,11 @@
     Class.implement = function( spec ){
         Object.xcopy( this.prototype, spec, function( method, name ){
             var proxy = this.prototype[ name ];
+            if( proxy && proxy.implement ){
+                proxy.implement( method );
+            }
+
+            /*
             if( proxy && proxy.isProxy ){
                 return proxy._returns ?
                     function(){
@@ -78,7 +83,7 @@
                         proxy.apply( this, arguments );
                         return method.apply( this, arguments );
                     };
-            }
+            }*/
         }, this );
     };
 
@@ -93,6 +98,8 @@
             if( !checker( value ) ) throw new TypeError();
             return value;
         };
+
+        this._default = typeof type === 'function' ? type.create() : value;
 
         return this;
     }
@@ -123,6 +130,8 @@
                     }
                 }
             }
+
+            if( '_default' in this ) return this._default;
         }
 
         proxy.takes = _takes;
