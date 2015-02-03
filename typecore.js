@@ -23,18 +23,44 @@
         return dest;
     };
 
+    Object.isLiteral = function( value ){
+        return value && typeof value === 'object' &&  Object.getPrototypeOf( value ) === Object.prototype;
+    };
+
+    Object.merge = function( destination, sources ){
+        for( var i = 0; i < sources.length; i++ ){
+            var source = sources[ i ];
+            typeof source === 'function' && ( source = source.prototype );
+
+            Object.xcopy( destination, source, function( value, name ){
+                if( !destination.hasOwnProperty( name ) ){
+                    return value;
+                }
+                else if( Object.isLiteral( destination[ name ] ) && Object.isLiteral( value ) ){
+                    return Object.merge( destination[ name ], [ value ] );
+                }
+            });
+        }
+
+        return destination;
+    }
+
     function Class(){
         return this.initialize.apply( this, arguments );
     }
 
     Class.prototype.initialize = function(){};
 
+    Class.mixin = function(){ return Object.merge( this.prototype, arguments ) };
+
     Object.extend = Class.extend = function( protoProps, staticProps ) {
-        var parent = this === Object ? Class : this,
-        child = protoProps.hasOwnProperty( 'constructor' ) ? protoProps.constructor :
-            ( protoProps.constructor = function(){
-                return parent.apply( this, arguments );
-            });
+        var parent = this === Object ? Class : this;
+
+        if( !protoProps.hasOwnProperty( 'constructor' ) ){
+            protoProps.constructor = function Ctor(){ return parent.apply( this, arguments ); };
+        }
+
+        var child = protoProps.constructor;
 
         Object.xcopy( child, parent );
         Object.xcopy( child, staticProps );
@@ -45,7 +71,6 @@
             })
         );
 
-        delete protoProps.properties;
         Object.xcopy( child.prototype, protoProps );
 
         child.__super__ = parent.prototype;

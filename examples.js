@@ -32,9 +32,9 @@ var Options = Object.type({
     a : Type, b : Type, c : Type
 })
 
+
+
 // TODO: array patterns
-var List = Array.of( Number )
-var List = Number.Array
 var List = [ Number.or( null ) ];
 
 //TODO: new spec for optional parameters
@@ -47,10 +47,13 @@ Type['?'] === Type.or( undefined )
 Object.ANY === Object['*']
 
 //Plain JS Object (Type.prototype === Object.prototype )
-Object.STRICT === Object['!']
+Object.Literal === Object['!']
 
 // TODO: function types as argument types
 .takes( Object, Object, [ Function.takes( Object['*'], String ).returns( Object.Any ), [ Object ] ])
+
+
+// integrate with sinon. It should create spy.
 
 // C++ style...
 var Something = Object.extend({ // TODO: extend any ctor function
