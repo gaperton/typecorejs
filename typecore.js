@@ -1,5 +1,5 @@
 ( function(){
-    function xmapcopy( dest, source, fun, context ){
+    Object.xmap( dest, source, fun, context ){
         context || ( context = null );
 
         for( var name in source ){
@@ -14,8 +14,6 @@
 
 
     Object.xcopy = function( dest, source ){
-        if( arguments.length > 2 ) return xmapcopy.apply( null, arguments );
-
         for( var name in source ){
             source.hasOwnProperty( name ) && ( dest[ name ] = source[ name ] );
         }
@@ -27,20 +25,15 @@
         return value && typeof value === 'object' &&  Object.getPrototypeOf( value ) === Object.prototype;
     };
 
-    Object.merge = function( destination, sources ){
-        for( var i = 0; i < sources.length; i++ ){
-            var source = sources[ i ];
-            typeof source === 'function' && ( source = source.prototype );
-
-            Object.xcopy( destination, source, function( value, name ){
-                if( !destination.hasOwnProperty( name ) ){
-                    return value;
-                }
-                else if( Object.isLiteral( destination[ name ] ) && Object.isLiteral( value ) ){
-                    return Object.merge( destination[ name ], [ value ] );
-                }
-            });
-        }
+    Object.xmerge = function( destination, source ){
+        Object.xmap( destination, source, function( value, name ){
+            if( !destination.hasOwnProperty( name ) ){
+                return value;
+            }
+            else if( Object.isLiteral( destination[ name ] ) && Object.isLiteral( value ) ){
+                return Object.xmerge( destination[ name ], value );
+            }
+        });
 
         return destination;
     }
@@ -51,7 +44,15 @@
 
     Class.prototype.initialize = function(){};
 
-    Class.mixin = function(){ return Object.merge( this.prototype, arguments ) };
+    Class.mixin = function(){
+        for( var i = 0; i < arguments.length; i++ ){
+            var source = arguments[ i ];
+            typeof source === 'function' && ( source = source.prototype );
+            Object.xmerge( this.prototype, source );
+        }
+
+        return this.prototype;
+    };
 
     Object.extend = Class.extend = function( protoProps, staticProps ) {
         var parent = this === Object ? Class : this;
@@ -66,7 +67,7 @@
         Object.xcopy( child, staticProps );
 
         child.prototype = Object.create( parent.prototype,
-            Object.xcopy( {}, protoProps.properties, function( spec ){
+            Object.xmap( {}, protoProps.properties, function( spec ){
                 return spec instanceof Function ? { get : spec } : spec;
             })
         );
@@ -91,7 +92,7 @@
     }
 
     Class.implement = function( spec ){
-        Object.xcopy( this.prototype, spec, function( method, name ){
+        Object.xmap( this.prototype, spec, function( method, name ){
             var proxy = this.prototype[ name ];
             if( proxy && proxy.implement ){
                 proxy.implement( method );

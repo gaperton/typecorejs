@@ -1,3 +1,35 @@
+Some = Object.extend({
+    a : 1,
+    b : {
+        c : 5
+    }
+});
+
+
+Other = Object.extend({
+    b : {
+        x : 10
+    }
+
+    triggers : [ 'change', 'change:some' ]
+
+
+    defaults : {
+        something : Type.listens
+    }
+
+
+    initialize : function(){
+        this[ 'change:me' ]();
+        this.change();
+
+        this.trigger( 'change', this );
+    }
+}).mixin( Some, Backbone.Events );
+
+
+
+
 // function specs
 {
     some : Function.args( Integer, Integer )
