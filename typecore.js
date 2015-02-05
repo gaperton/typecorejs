@@ -43,6 +43,7 @@
     }
 
     Class.prototype.initialize = function(){};
+    Class.prototype.defaults = function(){ return {}; };
 
     Class.mixin = function(){
         for( var i = 0; i < arguments.length; i++ ){
