@@ -34,3 +34,19 @@ View
   - event subscription
   - data binding
   - dispose
+
+
+(?) Dirty marks idea allows for transactional implementation for changed events.
+Dirty marks can be evaluated recursively, which si
+model.begin()
+model.end() will send out change events.
+
+However, there are also change:attr events, which needs to be executed immediately.
+
+Individual update must send both change + change:attr, or defer this in case if executed as the part of transaction.
+- don't trigger 'change' if executed as reaction on change:attr on the same object.
+Or, we could do 'wave updates' - execute bulk set, then send out all events.
+
+(!) Another mechanics for change events could be implemented on top of 'dirty' marks
+    In this case, every change operation marks attribute as 'dirty'.
+    At the end of the transaction, it must send change:attr for dirties, several times until everything
