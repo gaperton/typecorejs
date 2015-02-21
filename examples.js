@@ -82,7 +82,7 @@ Object.ANY === Object['*']
 Object.Literal === Object['!']
 
 // TODO: function types as argument types
-.takes( Object, Object, [ Function.takes( Object['*'], String ).returns( Object.Any ), [ Object ] ])
+.takes( Object, Object, Function.takes( Object['*'], String ).returns( Object.Any )['?'], Object['?'] )
 
 
 // integrate with sinon. It should create spy.
@@ -92,13 +92,13 @@ var Something = Object.extend({ // TODO: extend any ctor function
     counter : 0,
 
     add : Function
-        .takes( Array.or( Model ).or( Object['!'] ), SetOptions['?'] )
-        .returns.self,
+        .takes( Array.or( Model ).or( Object.Literal ), SetOptions['?'] )
+        .returns.SELF,
 
     set : Function
         .takes( String, Object.ANY, SetOptions['?'] )
-        .takes( Object['!'], SetOptions['?'] )
-        .returns.self,
+        .takes( Object.Literal, SetOptions['?'] )
+        .returns.SELF,
 
     initialize : Function.takes( Object.Plain ).returns(),
 
