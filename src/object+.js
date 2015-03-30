@@ -23,7 +23,7 @@ Object.xcopy = function( dest ){
     return dest;
 };
 
-Object.every = function( obj, fun, context ){
+Object.xevery = function( obj, fun, context ){
     if( obj.every ) return obj.every( fun, context );
 
     for( var name in source ){
@@ -36,7 +36,7 @@ Object.every = function( obj, fun, context ){
 };
 
 
-Object.isLiteral = function( value ){
+Object.xIsLiteral = function( value ){
     return value && typeof value === 'object' &&  Object.getPrototypeOf( value ) === Object.prototype;
 };
 
@@ -132,33 +132,36 @@ Class.mixin = function(){
 };
 
 Object.extend = Class.extend = function( protoProps, staticProps ) {
+    var Child = protoProps.hasOwnProperty( 'constructor' ) ? this.subtype( protoProps.constructor ) : this.subtype();
+    Child.implement( protoProps, staticProps );
+    return Child;
+};
+
+Object.subtype = function( Child ) {
     var Parent = this === Object ? Class : this;
 
-    if( !protoProps.hasOwnProperty( 'constructor' ) ){
-        function Ctor(){
-            return Parent.apply( this, arguments );
-        }
+    Child || ( Child = function Constructor(){
+        return Parent.apply( this, arguments );
+    });
 
-        protoProps.constructor = Ctor;
-    }
+    Object.xcopy( Child, Parent );
 
-    var Child = protoProps.constructor;
+    Child.prototype = Object.create( Parent.prototype );
+    Child.prototype.constructor = Child;
+    Child.__super__ = Parent.prototype;
 
-    Object.xcopy( Child, Parent, staticProps );
+    return Child;
+};
 
-    Child.prototype = Object.create( Parent.prototype,
+Class.implement = function( protoProps, staticProps ) {
+    Object.xcopy( this.prototype, protoProps );
+    Object.xcopy( this, staticProps );
+
+    Object.defineProperies( this.prototype,
         Object.xmap( {}, protoProps.properties, function( spec ){
             return spec instanceof Function ? { get : spec } : spec;
         })
     );
 
-    Object.xcopy( Child.prototype, protoProps );
-
-    Child.prototype.defaults = function(){
-        return Object.xcopy( Parent.prototype.defaults(), protoProps.defaults() );
-    };
-
-    Child.__super__ = Parent.prototype;
-
-    return Child;
+    return this;
 };
