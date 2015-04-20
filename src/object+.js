@@ -131,18 +131,12 @@ Class.mixin = function(){
     return this.prototype;
 };
 
+// Backbone-style extend with native properties and late definition support
 Object.extend = Class.extend = function( protoProps, staticProps ) {
-    var Child = protoProps.hasOwnProperty( 'constructor' ) ? this.subtype( protoProps.constructor ) : this.subtype();
-    Child.implement( protoProps, staticProps );
-    return Child;
-};
-
-Object.subtype = function( Child ) {
-    var Parent = this === Object ? Class : this;
-
-    Child || ( Child = function Constructor(){
-        return Parent.apply( this, arguments );
-    });
+    var Parent = this === Object ? Class : this,
+        Child = protoProps && protoProps.hasOwnProperty( 'constructor' ) ?
+                    protoProps.constructor :
+                    function Constructor(){ return Parent.apply( this, arguments ); };
 
     Object.xcopy( Child, Parent );
 
@@ -150,10 +144,12 @@ Object.subtype = function( Child ) {
     Child.prototype.constructor = Child;
     Child.__super__ = Parent.prototype;
 
+    protoProps && Child.define( protoProps, staticProps );
+
     return Child;
 };
 
-Class.implement = function( protoProps, staticProps ) {
+Class.define = function( protoProps, staticProps ) {
     Object.xcopy( this.prototype, protoProps );
     Object.xcopy( this, staticProps );
 

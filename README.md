@@ -1,6 +1,19 @@
 Features
 ===========
 
+v2.0
+----------------
+
+
+Object+
+----------------
+
+Object.extend( )
+Object.extend()
+Type.implement( ObjProps, TypeProps['?'] )
+
+Type.mixin( spec )
+
 Core.
 
 - Object.extend
